@@ -29,7 +29,8 @@ I don't feel like making from this a tutorial, but I am happy to share some key 
 docker-compose up -d
 symfony server:start
 ```
-1. Use the Cognito Hosted UI to acquire the Authentication token and set them as Bearer Token for your requests. With proper AWS credentials, the localhost application can hit Cognito with no trouble.
+4. The local docker container running DynamoDB must have the Talks table created. Check the AWS Cli command below.
+5. Use the Cognito Hosted UI to acquire the Authentication token and set them as Bearer Token for your requests. With proper AWS credentials, the localhost application can hit Cognito with no trouble.
 ### AWS
 1. `sls deploy`
 2. Have fun 🚀
