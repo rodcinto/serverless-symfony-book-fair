@@ -11,7 +11,7 @@ class Talk
 {
   use SelfValidateTrait;
 
-  private TalkPeriod $talkPeriod;
+  private Duration $duration;
 
   public function __construct(
     #[Assert\Uuid()]
@@ -25,7 +25,7 @@ class Talk
     #[Assert\Type('\DateTimeInterface')]
     private \DateTimeInterface $end,
   ) {
-    $this->talkPeriod = new TalkPeriod($begin, $end);
+    $this->duration = new Duration($begin, $end);
 
     $this->validateSelf();
   }
@@ -38,9 +38,9 @@ class Talk
       'organizerId' => $this->organizer->id,
       'authorId' => $this->author->id,
       'begin' =>
-        $this->talkPeriod->begin ? $this->begin->format('c') : null,
+        $this->duration->begin ? $this->begin->format('c') : null,
       'end' =>
-        $this->talkPeriod->end ? $this->talkPeriod->end->format('c') : null,
+        $this->duration->end ? $this->duration->end->format('c') : null,
     ];
   }
 }

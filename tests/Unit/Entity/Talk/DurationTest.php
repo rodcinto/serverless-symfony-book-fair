@@ -2,18 +2,18 @@
 
 namespace App\Tests\Unit\Entity\Member;
 
-use App\Entity\Talk\TalkPeriod;
+use App\Entity\Talk\Duration;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
-class TalkPeriodTest extends TestCase
+class DurationTest extends TestCase
 {
   public function testCanCreatePeriod()
   {
     $currentTime = new \DateTimeImmutable();
     $twoHoursLater = $currentTime->modify('+2 hours');
 
-    $tp = new TalkPeriod($currentTime, $twoHoursLater);
+    $tp = new Duration($currentTime, $twoHoursLater);
 
     $this->assertInstanceOf(\DateTimeImmutable::class, $tp->begin);
     $this->assertInstanceOf(\DateTimeImmutable::class, $tp->end);
@@ -26,6 +26,6 @@ class TalkPeriodTest extends TestCase
     $currentTime = new \DateTimeImmutable();
     $twoHoursLater = $currentTime->modify('-2 hours');
 
-    $tp = new TalkPeriod($currentTime, $twoHoursLater);
+    $tp = new Duration($currentTime, $twoHoursLater);
   }
 }

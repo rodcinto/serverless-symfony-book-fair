@@ -5,7 +5,7 @@ namespace App\Entity\Talk;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Entity\SelfValidateTrait;
 
-class TalkPeriod
+class Duration
 {
   use SelfValidateTrait;
 
