@@ -1,0 +1,94 @@
+# Read the documentation at https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml/
+service: symfony-book-fair-talk
+
+provider:
+  name: aws
+  region: eu-central-1
+  stage: test
+  runtime: provided.al2
+  environment:
+    APP_ENV: test
+    APP_DEBUG: false
+    APP_SECRET: 371c01665b7aea5816f9b965fdb2691c
+    DYNAMODB_TALKS_TABLE: ${self:service}-${opt:stage, 'test'}
+  httpApi:
+    authorizers:
+      symfonyBookfairAuthorizer:
+        type: jwt
+        identitySource: $request.header.Authorization
+        issuerUrl: https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_Tbxz7w16V
+        audience:
+          - "2r04jer0vr36pm4jgpjlm4j7au"
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TALKS_TABLE}"
+
+plugins:
+  - ./vendor/bref/bref
+
+functions:
+  # This function runs the Symfony website/API
+  web:
+    handler: public/index.php
+    timeout: 28 # in seconds (API Gateway has a timeout of 29 seconds)
+    layers:
+      - ${bref:layer.php-82-fpm}
+    events:
+      - httpApi:
+          method: "*"
+          path: "/{proxy+}"
+      - httpApi:
+          method: 'POST'
+          path: '/talk'
+          authorizer:
+            name: symfonyBookfairAuthorizer
+  # This function let us run console commands in Lambda
+  console:
+    handler: bin/aws-console
+    timeout: 120 # in seconds
+    environment:
+      APP_ENV: test
+    layers:
+      - ${bref:layer.php-82} # PHP
+      - ${bref:layer.console} # The "console" layer
+
+resources:
+  Resources:
+    TalksDynamoDbTable:
+      Type: "AWS::DynamoDB::Table"
+      DeletionPolicy: Delete
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TALKS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+package:
+  patterns:
+    # Excluded files and folders for deployment
+    - "!assets/**"
+    - "!node_modules/**"
+    - "!public/build/**"
+    - "!tests/**"
+    - "!var/**"
+    - "!.env.local"
+    # If you want to include files and folders that are part of excluded folders,
+    # add them at the end
+    - "var/cache/prod/**"
+    - "public/build/entrypoints.json"
+    - "public/build/manifest.json"

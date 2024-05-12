@@ -7,14 +7,24 @@
         "php": ">=8.2",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "aws/aws-sdk-php": "^3.306",
+        "aws/aws-sdk-php-symfony": "^2.7",
+        "bref/bref": "^2.1",
+        "bref/symfony-bridge": "^1.0",
+        "bref/symfony-messenger": "^1.2",
+        "symfony/amazon-sqs-messenger": "7.0.*",
         "symfony/console": "7.0.*",
         "symfony/dotenv": "7.0.*",
+        "symfony/expression-language": "7.0.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "7.0.*",
+        "symfony/monolog-bundle": "^3.10",
+        "symfony/property-access": "7.0.*",
         "symfony/runtime": "7.0.*",
+        "symfony/security-bundle": "7.0.*",
+        "symfony/uid": "7.0.*",
+        "symfony/validator": "7.0.*",
         "symfony/yaml": "7.0.*"
-    },
-    "require-dev": {
     },
     "config": {
         "allow-plugins": {
@@ -64,5 +74,12 @@
             "allow-contrib": false,
             "require": "7.0.*"
         }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0",
+        "symfony/browser-kit": "7.0.*",
+        "symfony/css-selector": "7.0.*",
+        "symfony/maker-bundle": "^1.59",
+        "symfony/phpunit-bridge": "^7.0"
     }
 }
