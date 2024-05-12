@@ -6,9 +6,9 @@ class Organizer extends User
 {
   public function __construct(
     string $id,
-    string $email,
+    ?string $email,
   ) {
-    parent::__construct($id, $email, [Role::ORGANIZER]);
+    parent::__construct($id, $email, [Role::ORGANIZER->value]);
     //No need to verify organizer from Cognito once it comes from the session. Right?
   }
 }

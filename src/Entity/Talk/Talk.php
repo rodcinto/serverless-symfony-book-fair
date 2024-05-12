@@ -43,4 +43,14 @@ class Talk
         $this->duration->end ? $this->duration->end->format('c') : null,
     ];
   }
+
+  public function isAssignedTo(Author $givenAuthor): bool
+  {
+    return $this->author->isSame($givenAuthor);
+  }
+
+  public function hasBeenCreatedBy(Organizer $givenOrganizer): bool
+  {
+    return $this->organizer->isSame($givenOrganizer);
+  }
 }

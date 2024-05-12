@@ -15,14 +15,8 @@ class TalkTest extends TestCase
   public function testCreateATalk(): void
   {
     $talkData = $this->validTalkData();
-    $talk = new Talk(
-      $talkData['id'],
-      $talkData['title'],
-      $talkData['organizer'],
-      $talkData['author'],
-      $talkData['begin'],
-      $talkData['end']
-    );
+    $talk = $this->createTalk();
+
     $this->assertNotEmpty($talk->toArray());
   }
 
@@ -54,6 +48,22 @@ class TalkTest extends TestCase
     }
   }
 
+  public function testIsAssignedToAuthor()
+  {
+    $talkData = $this->validTalkData();
+    $talk = $this->createTalk();
+
+    $this->assertTrue($talk->isAssignedTo($talkData['author']));
+  }
+
+  public function testHasBeenCreatedByOrganizer()
+  {
+    $talkData = $this->validTalkData();
+    $talk = $this->createTalk();
+
+    $this->assertTrue($talk->hasBeenCreatedBy($talkData['organizer']));
+  }
+
   private function validTalkData(): array
   {
     $currentTime = new \DateTimeImmutable();
@@ -65,9 +75,6 @@ class TalkTest extends TestCase
     $authorino = new Authorino();
     $author = new Author($authorino->id, $authorino->email, $authorino->role);
 
-    echo 'Now: ' . $currentTime->format('c');
-    echo 'Then: ' . $twoHoursLater->format('c');
-
     return [
       'id' => Uuid::v1(),
       'title' => 'How to make a nice Book Fair',
@@ -76,6 +83,19 @@ class TalkTest extends TestCase
       'begin' => $currentTime,
       'end' => $twoHoursLater,
     ];
+  }
+
+  private function createTalk(): Talk
+  {
+    $talkData = $this->validTalkData();
+    return new Talk(
+      $talkData['id'],
+      $talkData['title'],
+      $talkData['organizer'],
+      $talkData['author'],
+      $talkData['begin'],
+      $talkData['end']
+    );
   }
 
   private function generateRandomString($length = 10)

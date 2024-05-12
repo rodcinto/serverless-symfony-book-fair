@@ -13,7 +13,7 @@ class User implements UserInterface
   public function __construct(
     #[Assert\Uuid()]
     public readonly string $id,
-    public readonly string $email,
+    public readonly ?string $email,
     public readonly array $roles
   ) {
     $this->validateSelf();
@@ -40,5 +40,10 @@ class User implements UserInterface
   public function getUserIdentifier(): string
   {
     return $this->id;
+  }
+
+  public function isSame(self $user): bool
+  {
+    return $this->id === $user->getUserIdentifier();
   }
 }

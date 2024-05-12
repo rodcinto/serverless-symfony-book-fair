@@ -32,6 +32,8 @@ security:
     # - { path: ^/admin, roles: ROLE_ADMIN }
     # - { path: ^/profile, roles: ROLE_USER }
     - { path: ^/talk, roles: ROLE_ORGANIZER }
+    - { path: ^/talk, roles: ROLE_USER_METHOD, methods: [POST] }
+    - { path: ^/talk/\w+, roles: [ROLE_ORGANIZER, ROLE_AUTHOR] }
 
 when@test:
   security:

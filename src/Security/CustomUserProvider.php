@@ -2,6 +2,9 @@
 
 namespace App\Security;
 
+use App\Entity\Member\Author;
+use App\Entity\Member\Organizer;
+use App\Entity\Member\Role;
 use App\Entity\Member\User;
 use App\Service\ContextParser;
 use Aws\CognitoIdentityProvider\CognitoIdentityProviderClient;
@@ -30,11 +33,19 @@ class CustomUserProvider implements UserProviderInterface
 
     $parsedUser = ContextParser::fromCognitoApi($user);
 
-    return new User(
-      $parsedUser->cognitoUsername,
-      $parsedUser->cognitoEmail,
-      $parsedUser->cognitoRoles
-    );
+    switch ($parsedUser->cognitoRoles[0]) {
+      case Role::ORGANIZER->value:
+        return new Organizer($parsedUser->cognitoUsername, $parsedUser->cognitoEmail);
+      case Role::AUTHOR->value:
+        return new Author($parsedUser->cognitoUsername, $parsedUser->cognitoEmail);
+      default:
+      case Role::GUEST->value:
+        return new User(
+          $parsedUser->cognitoUsername,
+          $parsedUser->cognitoEmail,
+          $parsedUser->cognitoRoles
+        );
+    }
   }
 
   public function refreshUser(UserInterface $user): UserInterface
