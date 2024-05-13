@@ -40,3 +40,10 @@ services:
         credentials:
           key: "%env(AWS_ACCESS_KEY_ID)%"
           secret: "%env(AWS_SECRET_ACCESS_KEY)%"
+
+  App\Service\CreateTalk:
+    calls:
+      - setTableName: ["%env(DYNAMODB_TALKS_TABLE)%"]
+  App\Service\QueryTalk:
+    calls:
+      - setTableName: ["%env(DYNAMODB_TALKS_TABLE)%"]

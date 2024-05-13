@@ -8,9 +8,12 @@ use App\Entity\Talk\Talk;
 use Aws\DynamoDb\Marshaler;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Contracts\Service\Attribute\Required;
 
 class CreateTalk
 {
+  private string $tableName;
+
   public function __construct(
     private DynamoDbClient $dynamoDbClient,
     private LoggerInterface $logger
@@ -31,7 +34,7 @@ class CreateTalk
     $marshaler = new Marshaler();// I should inject this.
     $item = $marshaler->marshalJson(json_encode($talk->toArray()));
 
-    $tableName = $_ENV['DYNAMODB_TALKS_TABLE'] ?? 'Talks'; // I should inject this.
+    $tableName = $this->tableName; // I should inject this.
 
     $params = [
       'TableName' => $tableName,
@@ -49,5 +52,11 @@ class CreateTalk
     }
 
     return $talk->toArray();
+  }
+
+  #[Required]
+  public function setTableName(string $tableName): void
+  {
+    $this->tableName = $tableName;
   }
 }
