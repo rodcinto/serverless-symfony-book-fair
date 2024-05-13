@@ -8,7 +8,7 @@ class Author extends User
     string $id,
     ?string $email,
   ) {
-    parent::__construct($id, $email, [Role::AUTHOR]);
+    parent::__construct($id, $email, [Role::AUTHOR->value]);
     //TODO: Verify Author data in Cognito.
   }
 }

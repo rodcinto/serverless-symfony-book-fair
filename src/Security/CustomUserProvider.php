@@ -28,7 +28,7 @@ class CustomUserProvider implements UserProviderInterface
       ]);
     } catch(CognitoIdentityProviderException $exception) {
       // Log that thing.
-      throw new BadCredentialsException('Expired token or somehting 🤡');
+      throw new BadCredentialsException('Expired token or something 🤡');
     }
 
     $parsedUser = ContextParser::fromCognitoApi($user);
