@@ -41,9 +41,8 @@ services:
           key: "%env(AWS_ACCESS_KEY_ID)%"
           secret: "%env(AWS_SECRET_ACCESS_KEY)%"
 
-  App\Service\CreateTalk:
-    calls:
-      - setTableName: ["%env(DYNAMODB_TALKS_TABLE)%"]
-  App\Service\QueryTalk:
+  Aws\DynamoDb\Marshaler:
+    class: Aws\DynamoDb\Marshaler
+  App\Infrastructure\DynamoDBAdapter:
     calls:
       - setTableName: ["%env(DYNAMODB_TALKS_TABLE)%"]

@@ -4,7 +4,7 @@ namespace App\Tests\Unit\Entity\Member;
 
 use App\Entity\Talk\Duration;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
+use LogicException;
 
 class DurationTest extends TestCase
 {
@@ -21,7 +21,7 @@ class DurationTest extends TestCase
 
   public function testBeginMustBeEarlierThanEnd()
   {
-    $this->expectException(RuntimeException::class);
+    $this->expectException(LogicException::class);
 
     $currentTime = new \DateTimeImmutable();
     $twoHoursLater = $currentTime->modify('-2 hours');

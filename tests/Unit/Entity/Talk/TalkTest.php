@@ -2,19 +2,25 @@
 
 namespace App\Tests\Unit\Entity\Member;
 
-use App\Entity\Member\Author;
-use App\Entity\Member\Organizer;
+use App\Dto\TalkPrepareDto;
 use App\Entity\Talk\Talk;
-use App\Tests\Persona\Authorino;
-use App\Tests\Persona\Orgzer;
+use App\Tests\Unit\Entity\Talk\TalkData;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Uid\Uuid;
+use LogicException;
 
 class TalkTest extends TestCase
 {
+  private TalkData $talkData;
+
+  protected function setUp(): void
+  {
+      parent::setUp();
+
+      $this->talkData = new TalkData();
+  }
+
   public function testCreateATalk(): void
   {
-    $talkData = $this->validTalkData();
     $talk = $this->createTalk();
 
     $this->assertNotEmpty($talk->toArray());
@@ -22,13 +28,13 @@ class TalkTest extends TestCase
 
   public function testTitleWrongLength()
   {
-    // $this->expectException(RuntimeException::class);
+    // $this->expectException(LogicException::class);
     // $this->expectExceptionMessage('too long');
 
-    $talkData = $this->validTalkData();
+    $talkData = $this->talkData->createData();
     $createTalk = fn ($len) => new Talk(
       $talkData['id'],
-      $this->generateRandomString($len),
+      $this->talkData->generateRandomString($len),
       $talkData['organizer'],
       $talkData['author'],
       $talkData['begin'],
@@ -50,7 +56,7 @@ class TalkTest extends TestCase
 
   public function testIsAssignedToAuthor()
   {
-    $talkData = $this->validTalkData();
+    $talkData = $this->talkData->createData();
     $talk = $this->createTalk();
 
     $this->assertTrue($talk->isAssignedTo($talkData['author']));
@@ -58,36 +64,36 @@ class TalkTest extends TestCase
 
   public function testHasBeenCreatedByOrganizer()
   {
-    $talkData = $this->validTalkData();
+    $talkData = $this->talkData->createData();
     $talk = $this->createTalk();
 
     $this->assertTrue($talk->hasBeenCreatedBy($talkData['organizer']));
   }
 
-  private function validTalkData(): array
+  public function testCanNotBePublishedWithoutUpdates()
   {
-    $currentTime = new \DateTimeImmutable();
-    $twoHoursLater = $currentTime->modify('+2 hours');
+    $talk = $this->createTalk();
+    $this->expectException(LogicException::class);
+    $talk->canBePublished();
+  }
 
-    $orgzer = new Orgzer();
-    $organizer = new Organizer($orgzer->id, $orgzer->email, $orgzer->role);
+  public function testCanBePublished()
+  {
+    $talk = $this->createTalk();
+    $dto = new TalkPrepareDto(
+      null,
+      $this->talkData->generateRandomString(11),
+      $this->talkData->generateRandomString(21),
+    );
 
-    $authorino = new Authorino();
-    $author = new Author($authorino->id, $authorino->email, $authorino->role);
+    $talk->prepare($dto);
 
-    return [
-      'id' => Uuid::v1(),
-      'title' => 'How to make a nice Book Fair',
-      'organizer' => $organizer,
-      'author' => $author,
-      'begin' => $currentTime,
-      'end' => $twoHoursLater,
-    ];
+    $this->assertTrue($talk->canBePublished());
   }
 
   private function createTalk(): Talk
   {
-    $talkData = $this->validTalkData();
+    $talkData = $this->talkData->createData();
     return new Talk(
       $talkData['id'],
       $talkData['title'],
@@ -95,18 +101,6 @@ class TalkTest extends TestCase
       $talkData['author'],
       $talkData['begin'],
       $talkData['end']
-    );
-  }
-
-  private function generateRandomString($length = 10)
-  {
-    $stringRange = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    return substr(
-      str_shuffle(
-        str_repeat($stringRange, ceil($length / strlen($stringRange)))
-      ),
-      1,
-      $length
     );
   }
 }

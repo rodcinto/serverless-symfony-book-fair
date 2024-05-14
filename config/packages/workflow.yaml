@@ -1,0 +1,28 @@
+framework:
+  workflows:
+    talk:
+      type: "state_machine"
+      audit_trail:
+        enabled: true
+      marking_store:
+        type: "method"
+        property: "currentPlace"
+      supports:
+        - App\Entity\Talk\Talk
+      events_to_dispatch: []
+      initial_marking: !php/const App\Entity\Talk\Talk::STATE_DRAFT
+      places:
+        - !php/const App\Entity\Talk\Talk::STATE_DRAFT
+        - !php/const App\Entity\Talk\Talk::STATE_PUBLISHED
+        - !php/const App\Entity\Talk\Talk::STATE_STARTED
+        - !php/const App\Entity\Talk\Talk::STATE_FINISHED
+      transitions:
+        !php/const App\Entity\Talk\Talk::TRANSITION_TO_PUBLISHED:
+          from: !php/const App\Entity\Talk\Talk::STATE_DRAFT
+          to: !php/const App\Entity\Talk\Talk::STATE_PUBLISHED
+        !php/const App\Entity\Talk\Talk::TRANSITION_TO_STARTED:
+          from: !php/const App\Entity\Talk\Talk::STATE_PUBLISHED
+          to: !php/const App\Entity\Talk\Talk::STATE_STARTED
+        !php/const App\Entity\Talk\Talk::TRANSITION_TO_FINISHED:
+          from: !php/const App\Entity\Talk\Talk::STATE_STARTED
+          to: !php/const App\Entity\Talk\Talk::STATE_FINISHED

@@ -6,7 +6,7 @@ use App\Entity\Member\User;
 use App\Entity\Member\Author;
 use App\Tests\Persona\Authorino;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
+use LogicException;
 
 class AuthorTest extends TestCase
 {
@@ -28,7 +28,7 @@ class AuthorTest extends TestCase
 
   public function testCanNotCreateAuthorWithInvalidUuid()
   {
-    $this->expectException(RuntimeException::class);
+    $this->expectException(LogicException::class);
     $this->expectExceptionMessage('not a valid UUID');
 
     $author = new Author('12345', $this->authorino->email, $this->authorino->role);

@@ -3,11 +3,14 @@
 namespace App\Controller;
 
 use App\Dto\TalkInputDto;
+use App\Dto\TalkPrepareDto;
 use App\Entity\Member\Author;
 use App\Entity\Member\Organizer;
+use App\Entity\Talk\Talk;
+use App\Factory\TalkFactory;
+use App\Infrastructure\DynamoDBAdapter;
 use App\Security\TalkVoter;
 use App\Service\CreateTalk;
-use App\Service\QueryTalk;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,6 +19,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\UuidV1;
+use Symfony\Component\Workflow\WorkflowInterface;
 
 class TalkController extends AbstractController
 {
@@ -35,7 +39,13 @@ class TalkController extends AbstractController
       $response['error'][] = $th->getMessage();
       return $this->json($response, 400);
     }
+
     $user = $security->getUser();
+    if (!$user) {
+      $response['error'][] = 'Organizer not found.';
+      return $this->json($response, 400);
+    }
+
     $organizer = new Organizer($user->getUserIdentifier(), $user->email);
 
     try {
@@ -66,13 +76,37 @@ class TalkController extends AbstractController
   }
 
   #[Route('/talk/{id}', methods: [Request::METHOD_PATCH], name: 'app_talk_prepare')]
-  public function prepare(UuidV1 $id, QueryTalk $queryTalkService): JsonResponse
-  {
-    $talk = $queryTalkService->findById($id);
+  public function prepare(
+    UuidV1 $id,
+    Request $request,
+    DynamoDBAdapter $dynamoDBAdapter,
+    WorkflowInterface $talkStateMachine
+  ): JsonResponse {
+    $dynamoResult = $dynamoDBAdapter->findById($id);
+    if (!$dynamoResult) {
+      return $this->json([
+        'error' => sprintf('Talk id "%s" not found.', (string)$id)
+      ], 400);
+    }
+
+    $talk = TalkFactory::fromDynamoDB($dynamoResult);
+
     $this->denyAccessUnlessGranted(TalkVoter::EDIT, $talk);
 
-    dump($talk);
+    $payload = $request->getPayload();
 
-    return $this->json('If you can see this, you are the Author assigned or the Organizer who created the talk.', 200);
+    $prepareDto = new TalkPrepareDto(
+      $payload->get('title'),
+      $payload->get('teaser'),
+      $payload->get('description')
+    );
+
+    $talk->prepare($prepareDto);
+
+    $talkStateMachine->apply($talk, Talk::TRANSITION_TO_PUBLISHED);
+
+    $dynamoDBAdapter->putItem($talk->toArray());
+
+    return $this->json($talk->toArray(), 200);
   }
 }

@@ -6,7 +6,7 @@ use App\Entity\Member\User;
 use App\Entity\Member\Organizer;
 use App\Tests\Persona\Orgzer;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
+use LogicException;
 
 class OrganizerTest extends TestCase
 {
@@ -27,7 +27,7 @@ class OrganizerTest extends TestCase
 
   public function testCanNotCreateOrganizerWithInvalidUuid()
   {
-    $this->expectException(RuntimeException::class);
+    $this->expectException(LogicException::class);
     $this->expectExceptionMessage('not a valid UUID');
 
     $organizer = new Organizer('123456', $this->orgzer->email, $this->orgzer->role);
