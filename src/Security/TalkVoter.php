@@ -13,11 +13,13 @@ class TalkVoter extends Voter
 {
   // these strings are just invented: you can use anything
   public const EDIT = 'edit';
+  public const START = 'start';
+  public const FINISH = 'finish';
 
   protected function supports(string $attribute, mixed $subject): bool
   {
     // if the attribute isn't one we support, return false
-    if (!in_array($attribute, [self::EDIT])) {
+    if (!in_array($attribute, [self::EDIT, self::START, self::FINISH])) {
       return false;
     }
 
@@ -44,6 +46,8 @@ class TalkVoter extends Voter
 
     return match ($attribute) {
       self::EDIT => $this->canEdit($talk, $user),
+      self::START => $this->canEdit($talk, $user),
+      self::FINISH => $this->canEdit($talk, $user),
       default => throw new \LogicException('This code should not be reached!')
     };
   }

@@ -21,7 +21,7 @@ class TalkFactory
     $parsedEnd = DateTimeImmutable::createFromFormat(DateTimeInterface::ATOM, $item['end']['S']);
 
 
-    return new Talk(
+    $talk = new Talk(
       $item['id']['S'],
       $item['title']['S'],
       $organizer,
@@ -29,5 +29,9 @@ class TalkFactory
       $parsedBegin,
       $parsedEnd
     );
+
+    $talk->setCurrentPlace($item['currentPlace']['S']);
+
+    return $talk;
   }
 }

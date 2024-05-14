@@ -35,6 +35,10 @@ security:
     - { path: ^/talk, roles: ROLE_USER_METHOD, methods: [POST] }
     - { path: ^/talk/\w+, roles: [ROLE_AUTHOR] }
     - { path: ^/talk/\w+, roles: [ROLE_ORGANIZER] }
+    - { path: ^/talk/start, roles: [ROLE_AUTHOR] }
+    - { path: ^/talk/start, roles: [ROLE_ORGANIZER] }
+    - { path: ^/talk/finish, roles: [ROLE_AUTHOR] }
+    - { path: ^/talk/finish, roles: [ROLE_ORGANIZER] }
 
 when@test:
   security:

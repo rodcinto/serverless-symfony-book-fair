@@ -109,4 +109,79 @@ class TalkController extends AbstractController
 
     return $this->json($talk->toArray(), 200);
   }
+
+  #[Route('/talk/{id}/start', methods: [Request::METHOD_POST], name: 'app_talk_start')]
+  public function start(
+    UuidV1 $id,
+    DynamoDBAdapter $dynamoDBAdapter,
+    WorkflowInterface $talkStateMachine
+  ): JsonResponse {
+    $dynamoResult = $dynamoDBAdapter->findById($id);
+    if (!$dynamoResult) {
+      return $this->json([
+        'error' => sprintf('Talk id "%s" not found.', (string)$id)
+      ], 400);
+    }
+
+    $talk = TalkFactory::fromDynamoDB($dynamoResult);
+
+    $this->denyAccessUnlessGranted(TalkVoter::START, $talk);
+
+    if ($talk->getCurrentPlace() === Talk::STATE_STARTED) {
+      return $this->json([
+        'message' => 'started'
+      ], 200);
+    }
+
+    try {
+      $talkStateMachine->apply($talk, Talk::TRANSITION_TO_STARTED);
+      $dynamoDBAdapter->putItem($talk->toArray());
+    } catch (\Throwable $th) {
+      return $this->json([
+        'error' => 'Could not start. Check if the Talk is published or isn\'t finished.'
+      ], 400);
+    }
+
+    return $this->json([
+      'message' => 'started'
+    ], 200);
+  }
+
+  #[Route('/talk/{id}/finish', methods: [Request::METHOD_POST], name: 'app_talk_finish')]
+  public function finish(
+    UuidV1 $id,
+    DynamoDBAdapter $dynamoDBAdapter,
+    WorkflowInterface $talkStateMachine
+  ): JsonResponse
+  {
+    $dynamoResult = $dynamoDBAdapter->findById($id);
+    if (!$dynamoResult) {
+      return $this->json([
+        'error' => sprintf('Talk id "%s" not found.', (string)$id)
+      ], 400);
+    }
+
+    $talk = TalkFactory::fromDynamoDB($dynamoResult);
+
+    $this->denyAccessUnlessGranted(TalkVoter::FINISH, $talk);
+
+    if ($talk->getCurrentPlace() === Talk::STATE_FINISHED) {
+      return $this->json([
+        'message' => 'finished'
+      ], 200);
+    }
+
+    try {
+      $talkStateMachine->apply($talk, Talk::TRANSITION_TO_FINISHED);
+      $dynamoDBAdapter->putItem($talk->toArray());
+    } catch (\Throwable $th) {
+      return $this->json([
+        'error' => 'Could not finish. Make sure the Talk has been started.'
+      ], 400);
+    }
+
+    return $this->json([
+      'message' => 'finished'
+    ], 200);
+  }
 }
