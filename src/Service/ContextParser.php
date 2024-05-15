@@ -9,10 +9,14 @@ class ContextParser
   public function __construct(
     public readonly string $cognitoUsername,
     public readonly ?string $cognitoEmail,
+    /** @var array<string> */
     public readonly ?array $cognitoRoles = []
   ) {
   }
 
+  /**
+   * @param array<mixed> $context
+   */
   public static function fromLambdaContext(array $context): ?self
   {
     if (
@@ -39,6 +43,9 @@ class ContextParser
     return null;
   }
 
+  /**
+   * @param AWSResult<mixed> $result
+   */
   public static function fromCognitoApi(AWSResult $result): ?self
   {
     $findAttribute = function (string $name) use ($result) {

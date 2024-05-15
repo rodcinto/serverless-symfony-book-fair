@@ -26,7 +26,7 @@ class TalkTest extends TestCase
     $this->assertNotEmpty($talk->toArray());
   }
 
-  public function testTitleWrongLength()
+  public function testTitleWrongLength(): void
   {
     // $this->expectException(LogicException::class);
     // $this->expectExceptionMessage('too long');
@@ -54,7 +54,7 @@ class TalkTest extends TestCase
     }
   }
 
-  public function testIsAssignedToAuthor()
+  public function testIsAssignedToAuthor(): void
   {
     $talkData = $this->talkData->createData();
     $talk = $this->createTalk();
@@ -62,7 +62,7 @@ class TalkTest extends TestCase
     $this->assertTrue($talk->isAssignedTo($talkData['author']));
   }
 
-  public function testHasBeenCreatedByOrganizer()
+  public function testHasBeenCreatedByOrganizer(): void
   {
     $talkData = $this->talkData->createData();
     $talk = $this->createTalk();
@@ -70,14 +70,14 @@ class TalkTest extends TestCase
     $this->assertTrue($talk->hasBeenCreatedBy($talkData['organizer']));
   }
 
-  public function testCanNotBePublishedWithoutUpdates()
+  public function testCanNotBePublishedWithoutUpdates(): void
   {
     $talk = $this->createTalk();
     $this->expectException(LogicException::class);
     $talk->canBePublished();
   }
 
-  public function testCanBePublished()
+  public function testCanBePublished(): void
   {
     $talk = $this->createTalk();
     $dto = new TalkPrepareDto(

@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 class UserTest extends TestCase
 {
-  public function testTwoUsersAreSame()
+  public function testTwoUsersAreSame(): void
   {
     $authorino = new Authorino();
     $user1 = new User($authorino->id, $authorino->email, $authorino->role);

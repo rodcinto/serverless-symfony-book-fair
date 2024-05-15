@@ -8,8 +8,14 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 trait SelfValidateTrait
 {
+  /**
+   * @var string[]
+   */
   private array $errors = [];
 
+  /**
+   * @param string[] $groups
+   */
   private function validateSelf(array $groups = []): void
   {
     // enableAttributeMapping() is needed to validate $this with attributes.
@@ -28,6 +34,9 @@ trait SelfValidateTrait
     }
   }
 
+  /**
+   * @return string[]
+   */
   private function iterateViolations(ConstraintViolationListInterface $violations): array
   {
     $errors = [];

@@ -10,16 +10,19 @@ use Symfony\Component\Uid\Uuid;
 
 class TalkData
 {
+  /**
+   * @return array<mixed>
+   */
   public function createData(): array
   {
     $currentTime = new \DateTimeImmutable();
     $twoHoursLater = $currentTime->modify('+2 hours');
 
     $orgzer = new Orgzer();
-    $organizer = new Organizer($orgzer->id, $orgzer->email, $orgzer->role);
+    $organizer = new Organizer($orgzer->id, $orgzer->email);
 
     $authorino = new Authorino();
-    $author = new Author($authorino->id, $authorino->email, $authorino->role);
+    $author = new Author($authorino->id, $authorino->email);
 
     return [
       'id' => Uuid::v1(),
@@ -30,12 +33,13 @@ class TalkData
       'end' => $twoHoursLater,
     ];
   }
-  public function generateRandomString($length = 10)
+
+  public function generateRandomString(int $length = 10): string
   {
     $stringRange = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     return substr(
       str_shuffle(
-        str_repeat($stringRange, ceil($length / strlen($stringRange)))
+        str_repeat($stringRange, (int)ceil($length / strlen($stringRange)))
       ),
       1,
       $length

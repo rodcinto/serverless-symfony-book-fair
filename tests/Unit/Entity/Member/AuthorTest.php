@@ -19,18 +19,18 @@ class AuthorTest extends TestCase
     $this->authorino = new Authorino();
   }
 
-  public function testCanCreateAuthor()
+  public function testCanCreateAuthor(): void
   {
-    $author = new Author($this->authorino->id, $this->authorino->email, $this->authorino->role);
+    $author = new Author($this->authorino->id, $this->authorino->email);
 
     $this->assertInstanceOf(User::class, $author);
   }
 
-  public function testCanNotCreateAuthorWithInvalidUuid()
+  public function testCanNotCreateAuthorWithInvalidUuid(): void
   {
     $this->expectException(LogicException::class);
     $this->expectExceptionMessage('not a valid UUID');
 
-    $author = new Author('12345', $this->authorino->email, $this->authorino->role);
+    $author = new Author('12345', $this->authorino->email);
   }
 }

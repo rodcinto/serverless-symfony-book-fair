@@ -7,13 +7,16 @@ use PHPUnit\Framework\TestCase;
 
 class ContextParserTest extends TestCase
 {
-  public function testCreateFromLambdaArray()
+  public function testCreateFromLambdaArray(): void
   {
     $context = ContextParser::fromLambdaContext($this->sampleArray());
     $this->assertEquals('3054e733-6c68-4fe5-b038-53953299d5ba', $context->cognitoUsername);
     $this->assertEquals(['organizers'], $context->cognitoRoles);
   }
 
+  /**
+   * @return string[]
+   */
   private function sampleArray(): array
   {
     return [

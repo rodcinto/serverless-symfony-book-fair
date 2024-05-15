@@ -8,7 +8,7 @@ use LogicException;
 
 class DurationTest extends TestCase
 {
-  public function testCanCreatePeriod()
+  public function testCanCreatePeriod(): void
   {
     $currentTime = new \DateTimeImmutable();
     $twoHoursLater = $currentTime->modify('+2 hours');
@@ -19,7 +19,7 @@ class DurationTest extends TestCase
     $this->assertInstanceOf(\DateTimeImmutable::class, $tp->end);
   }
 
-  public function testBeginMustBeEarlierThanEnd()
+  public function testBeginMustBeEarlierThanEnd(): void
   {
     $this->expectException(LogicException::class);
 

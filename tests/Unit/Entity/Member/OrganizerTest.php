@@ -18,18 +18,18 @@ class OrganizerTest extends TestCase
 
       $this->orgzer = new Orgzer();
   }
-  public function testCanCreateOrganizer()
+  public function testCanCreateOrganizer(): void
   {
-    $organizer = new Organizer($this->orgzer->id, $this->orgzer->email, $this->orgzer->role);
+    $organizer = new Organizer($this->orgzer->id, $this->orgzer->email);
 
     $this->assertInstanceOf(User::class, $organizer);
   }
 
-  public function testCanNotCreateOrganizerWithInvalidUuid()
+  public function testCanNotCreateOrganizerWithInvalidUuid(): void
   {
     $this->expectException(LogicException::class);
     $this->expectExceptionMessage('not a valid UUID');
 
-    $organizer = new Organizer('123456', $this->orgzer->email, $this->orgzer->role);
+    $organizer = new Organizer('123456', $this->orgzer->email);
   }
 }

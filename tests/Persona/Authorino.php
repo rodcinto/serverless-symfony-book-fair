@@ -8,5 +8,6 @@ class Authorino
   public string $givenName = 'Authorino';
   public string $familyName = 'Smith';
   public string $email = 'author.smith@rods-book.fair';
+  /** @var array<string> */
   public array $role = ['ROLE_AUTHOR'];
 }

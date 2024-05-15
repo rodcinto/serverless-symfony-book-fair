@@ -6,11 +6,7 @@ use App\Dto\TalkPrepareDto;
 use App\Entity\Member\Author;
 use App\Entity\Member\Organizer;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Validation;
 use App\Entity\SelfValidateTrait;
-use LogicException;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
 class Talk
 {
@@ -42,7 +38,7 @@ class Talk
     private Author $author,
     #[Assert\Type('\DateTimeInterface', groups: ['creation'])]
     private \DateTimeInterface $begin,
-    #[Assert\Type('\DateTimeInterface', groups: ['creation'])]
+    #[Assert\Type('\DateTimeInterface', groups: ['creation'])] // @phpstan-ignore-line
     private \DateTimeInterface $end,
   ) {
     $this->duration = new Duration($begin, $end);
@@ -59,6 +55,9 @@ class Talk
     $this->description = $dto->description;
   }
 
+  /**
+   * @return string[]
+   */
   public function toArray(): array
   {
     $data = [
@@ -98,7 +97,7 @@ class Talk
     return $this->currentPlace;
   }
 
-  public function setCurrentPlace(string $currentPlace, array $context = []): void
+  public function setCurrentPlace(string $currentPlace): void
   {
     $this->currentPlace = $currentPlace;
   }

@@ -10,6 +10,9 @@ class User implements UserInterface
 {
   use SelfValidateTrait;
 
+  /**
+   * @param string[] $roles
+   */
   public function __construct(
     #[Assert\Uuid()]
     public readonly string $id,

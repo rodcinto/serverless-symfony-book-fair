@@ -8,5 +8,6 @@ class Orgzer
   public string $givenName = 'Orgzer';
   public string $familyName = 'Johnson';
   public string $email = 'org.johnson@rods-book.fair';
+  /** @var array<string> */
   public array $role = ['ROLE_ORGANIZER'];
 }

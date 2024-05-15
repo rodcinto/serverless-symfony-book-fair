@@ -6,6 +6,7 @@ use App\Dto\TalkInputDto;
 use App\Dto\TalkPrepareDto;
 use App\Entity\Member\Author;
 use App\Entity\Member\Organizer;
+use App\Entity\Member\User;
 use App\Entity\Talk\Talk;
 use App\Factory\TalkFactory;
 use App\Infrastructure\DynamoDBAdapter;
@@ -20,6 +21,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\UuidV1;
 use Symfony\Component\Workflow\WorkflowInterface;
+use Aws\Result;
 
 class TalkController extends AbstractController
 {
@@ -40,6 +42,7 @@ class TalkController extends AbstractController
       return $this->json($response, 400);
     }
 
+    /** @var User|null */
     $user = $security->getUser();
     if (!$user) {
       $response['error'][] = 'Organizer not found.';
@@ -82,6 +85,7 @@ class TalkController extends AbstractController
     DynamoDBAdapter $dynamoDBAdapter,
     WorkflowInterface $talkStateMachine
   ): JsonResponse {
+    /** @var Result<mixed>|null */
     $dynamoResult = $dynamoDBAdapter->findById($id);
     if (!$dynamoResult) {
       return $this->json([
@@ -116,6 +120,7 @@ class TalkController extends AbstractController
     DynamoDBAdapter $dynamoDBAdapter,
     WorkflowInterface $talkStateMachine
   ): JsonResponse {
+    /** @var Result<mixed>|null */
     $dynamoResult = $dynamoDBAdapter->findById($id);
     if (!$dynamoResult) {
       return $this->json([
@@ -154,6 +159,7 @@ class TalkController extends AbstractController
     WorkflowInterface $talkStateMachine
   ): JsonResponse
   {
+    /** @var Result<mixed>|null */
     $dynamoResult = $dynamoDBAdapter->findById($id);
     if (!$dynamoResult) {
       return $this->json([

@@ -53,6 +53,9 @@ class CustomUserProvider implements UserProviderInterface
     return $user;
   }
 
+  /**
+   * @param mixed $class
+   */
   public function supportsClass($class): bool
   {
     return User::class === $class;

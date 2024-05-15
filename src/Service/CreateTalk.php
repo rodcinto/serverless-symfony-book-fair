@@ -19,6 +19,9 @@ class CreateTalk
   ) {
   }
 
+  /**
+   * @return array<mixed>
+   */
   public function create(TalkInputDto $dto): array
   {
     $talk = new Talk(

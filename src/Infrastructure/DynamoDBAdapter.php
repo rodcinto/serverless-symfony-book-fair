@@ -24,6 +24,9 @@ class DynamoDBAdapter
     $this->tableName = $tableName;
   }
 
+  /**
+   * @param array<mixed> $item
+   */
   public function putItem(array $item): void
   {
     $itemEncoded = $this->marshaler->marshalJson(json_encode($item));
@@ -35,8 +38,12 @@ class DynamoDBAdapter
     $this->dynamoDbClient->putItem($params);
   }
 
-  public function findById(UuidV1 $id): Result
+  /**
+   * @return ?Result<mixed>
+   */
+  public function findById(UuidV1 $id): ?Result
   {
+    /** @var Result<mixed>|null */
     $result = $this->dynamoDbClient->getItem([
       'Key' => [
         'id' => [

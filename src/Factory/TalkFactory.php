@@ -11,6 +11,9 @@ use DateTimeInterface;
 
 class TalkFactory
 {
+  /**
+   * @param Result<mixed> $data
+   */
   public static function fromDynamoDB(Result $data): ?Talk
   {
     $item = $data->get('Item');
