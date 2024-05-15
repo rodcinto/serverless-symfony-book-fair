@@ -108,4 +108,9 @@ class Talk
 
     return count($this->errors) === 0;
   }
+
+  public function canSubscribe(): bool
+  {
+    return $this->currentPlace === self::STATE_PUBLISHED;
+  }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Dto\SubscribeToTalkDto;
 use App\Dto\TalkInputDto;
 use App\Dto\TalkPrepareDto;
 use App\Entity\Member\Author;
@@ -10,6 +11,7 @@ use App\Entity\Member\User;
 use App\Entity\Talk\Talk;
 use App\Factory\TalkFactory;
 use App\Infrastructure\DynamoDBAdapter;
+use App\Message\SubscriptionMessage;
 use App\Security\TalkVoter;
 use App\Service\CreateTalk;
 use DateTimeImmutable;
@@ -22,9 +24,14 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\UuidV1;
 use Symfony\Component\Workflow\WorkflowInterface;
 use Aws\Result;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class TalkController extends AbstractController
 {
+  public function __construct(private DynamoDBAdapter $dynamoDBAdapter)
+  {
+  }
+
   #[Route('/talk', methods: [Request::METHOD_POST], name: 'app_talk_create')]
   public function create(
     Security $security,
@@ -82,11 +89,10 @@ class TalkController extends AbstractController
   public function prepare(
     UuidV1 $id,
     Request $request,
-    DynamoDBAdapter $dynamoDBAdapter,
     WorkflowInterface $talkStateMachine
   ): JsonResponse {
     /** @var Result<mixed>|null */
-    $dynamoResult = $dynamoDBAdapter->findById($id);
+    $dynamoResult = $this->dynamoDBAdapter->findById($id);
     if (!$dynamoResult) {
       return $this->json([
         'error' => sprintf('Talk id "%s" not found.', (string)$id)
@@ -109,7 +115,7 @@ class TalkController extends AbstractController
 
     $talkStateMachine->apply($talk, Talk::TRANSITION_TO_PUBLISHED);
 
-    $dynamoDBAdapter->putItem($talk->toArray());
+    $this->dynamoDBAdapter->putItem($talk->toArray());
 
     return $this->json($talk->toArray(), 200);
   }
@@ -117,11 +123,10 @@ class TalkController extends AbstractController
   #[Route('/talk/{id}/start', methods: [Request::METHOD_POST], name: 'app_talk_start')]
   public function start(
     UuidV1 $id,
-    DynamoDBAdapter $dynamoDBAdapter,
     WorkflowInterface $talkStateMachine
   ): JsonResponse {
     /** @var Result<mixed>|null */
-    $dynamoResult = $dynamoDBAdapter->findById($id);
+    $dynamoResult = $this->dynamoDBAdapter->findById($id);
     if (!$dynamoResult) {
       return $this->json([
         'error' => sprintf('Talk id "%s" not found.', (string)$id)
@@ -140,7 +145,7 @@ class TalkController extends AbstractController
 
     try {
       $talkStateMachine->apply($talk, Talk::TRANSITION_TO_STARTED);
-      $dynamoDBAdapter->putItem($talk->toArray());
+      $this->dynamoDBAdapter->putItem($talk->toArray());
     } catch (\Throwable $th) {
       return $this->json([
         'error' => 'Could not start. Check if the Talk is published or isn\'t finished.'
@@ -155,12 +160,10 @@ class TalkController extends AbstractController
   #[Route('/talk/{id}/finish', methods: [Request::METHOD_POST], name: 'app_talk_finish')]
   public function finish(
     UuidV1 $id,
-    DynamoDBAdapter $dynamoDBAdapter,
     WorkflowInterface $talkStateMachine
-  ): JsonResponse
-  {
+  ): JsonResponse {
     /** @var Result<mixed>|null */
-    $dynamoResult = $dynamoDBAdapter->findById($id);
+    $dynamoResult = $this->dynamoDBAdapter->findById($id);
     if (!$dynamoResult) {
       return $this->json([
         'error' => sprintf('Talk id "%s" not found.', (string)$id)
@@ -179,7 +182,7 @@ class TalkController extends AbstractController
 
     try {
       $talkStateMachine->apply($talk, Talk::TRANSITION_TO_FINISHED);
-      $dynamoDBAdapter->putItem($talk->toArray());
+      $this->dynamoDBAdapter->putItem($talk->toArray());
     } catch (\Throwable $th) {
       return $this->json([
         'error' => 'Could not finish. Make sure the Talk has been started.'
@@ -189,5 +192,48 @@ class TalkController extends AbstractController
     return $this->json([
       'message' => 'finished'
     ], 200);
+  }
+
+  #[Route('/talk/{id}/subscribe', methods: [Request::METHOD_POST], name: 'app_talk_subscribe')]
+  public function subscribe(
+    UuidV1 $id,
+    Security $security,
+    MessageBusInterface $bus
+  ): JsonResponse {
+    /** @var Result<mixed>|null */
+    $dynamoResult = $this->dynamoDBAdapter->findById($id);
+    if (!$dynamoResult) {
+      return $this->json([
+        'error' => sprintf('Talk id "%s" not found.', (string)$id)
+      ], 400);
+    }
+
+    /** @var User|null */
+    $user = $security->getUser();
+    if (!$user) {
+      $response['error'][] = 'Organizer not found.';
+      return $this->json($response, 400);
+    }
+
+    $talk = TalkFactory::fromDynamoDB($dynamoResult);
+    if (!$talk->canSubscribe()) {
+      return $this->json([
+        'error' => sprintf('Could not subscribe to talk "%s". Check if the talk is published or hasn\'t already started.', $id)
+      ], 400);
+    }
+
+    $dto = new SubscribeToTalkDto(
+      (string) $id,
+      $user->getUserIdentifier(),
+      $user->email
+    );
+
+    $bus->dispatch(new SubscriptionMessage($dto));
+
+    return $this->json([
+      'message' => 'Subscribed',
+      'talkId' => $id,
+      'userId' => $user->getUserIdentifier(),
+    ], 201);
   }
 }

@@ -11,6 +11,7 @@ provider:
     APP_DEBUG: false
     APP_SECRET: 371c01665b7aea5816f9b965fdb2691c
     DYNAMODB_TALKS_TABLE: ${self:service}-${opt:stage, 'test'}
+    MESSENGER_TRANSPORT_DSN: https://sqs.eu-central-1.amazonaws.com/643901222908/BookFair
   httpApi:
     authorizers:
       symfonyBookfairAuthorizer:
@@ -31,6 +32,10 @@ provider:
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
           Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TALKS_TABLE}"
+        - Effect: Allow
+          Action:
+            - sqs:*
+          Resource: "arn:aws:sqs:eu-central-1:643901222908:BookFair"
 
 plugins:
   - ./vendor/bref/bref
